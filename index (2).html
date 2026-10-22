@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculator</title>
+<style>
+body{font-family:Arial,sans-serif;background:#eef3f2;display:flex;justify-content:center;padding:2rem 1rem}
+.calc{background:#1B2A2F;padding:1rem;border-radius:14px;width:100%;max-width:320px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+#display{background:#fff;color:#1B2A2F;font-size:2rem;text-align:right;padding:1rem;border-radius:8px;margin-bottom:1rem;overflow:hidden}
+.keys{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem}
+button{padding:1rem 0;font-size:1.2rem;border:0;border-radius:8px;background:#e5eeee;cursor:pointer;transition:transform .1s}
+button:hover{transform:translateY(-2px)}
+button.op{background:#E9A23B}
+button.eq{background:#0F6E8C;color:#fff}
+button.clear{grid-column:1/-1;background:#b3261e;color:#fff}
+</style>
+</head>
+<body>
+<div class="calc">
+  <div id="display">0</div>
+  <div class="keys" id="keys"></div>
+</div>
+<script>
+let cur = '0', prev = null, op = null, fresh = false;
+const display = document.getElementById('display');
+const keys = ['7','8','9','÷','4','5','6','×','1','2','3','-','0','.','=','+'];
+
+function calculate() {
+  if (op === null || prev === null) return;
+  const a = parseFloat(prev), b = parseFloat(cur);
+  let r;
+  if (op === '+') r = a + b;
+  else if (op === '-') r = a - b;
+  else if (op === '×') r = a * b;
+  else r = b === 0 ? 'Error' : a / b;
+  cur = r === 'Error' ? r : String(+r.toFixed(8));
+  prev = null;
+  fresh = true;
+}
+
+function press(k) {
+  if ('0123456789.'.includes(k)) {
+    if (fresh || (cur === '0' && k !== '.')) { cur = k; fresh = false; }
+    else if (!(k === '.' && cur.includes('.'))) cur += k;
+  } else if (k === 'C') {
+    cur = '0'; prev = null; op = null; fresh = false;
+  } else if (k === '=') {
+    calculate(); op = null;
+  } else {
+    calculate(); op = k; prev = cur; fresh = true;
+  }
+  display.textContent = cur;
+}
+
+const clear = document.createElement('button');
+clear.textContent = 'Clear';
+clear.className = 'clear';
+clear.onclick = () => press('C');
+document.getElementById('keys').appendChild(clear);
+
+keys.forEach(k => {
+  const b = document.createElement('button');
+  b.textContent = k;
+  if ('÷×-+'.includes(k)) b.className = 'op';
+  if (k === '=') b.className = 'eq';
+  b.onclick = () => press(k);
+  document.getElementById('keys').appendChild(b);
+});
+</script>
+</body>
+</html>
